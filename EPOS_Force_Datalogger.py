@@ -12,7 +12,21 @@ import numpy as np
 import pandas as pd
 from nidaqmx.constants import AcquisitionType, Edge, TerminalConfiguration
 
-from utils import EPOS  # Required for EPOS sensor
+from hardware import EPOS  # Required for EPOS sensor
+
+
+# --------------------------------------------------------------------------------------------------------------------
+# Classes
+# --------------------------------------------------------------------------------------------------------------------
+class DAQTerminalConfig(Enum):
+    """This class enumerates the possible values for the DAQ TerminalConfiguration value as specified in the NiDAQmx API"""
+
+    DEFAULT = 0
+    DIFF = 1
+    NRSE = 2
+    PSEUDO_DIFF = 3
+    RSE = 4
+
 
 # --------------------------------------------------------------------------------------------------------------------
 # General purpose variables
@@ -39,23 +53,9 @@ DAQ_sample_rate = 1000  # Sample rate in Hz
 DAQ_acquisition_duration = 1  # Duration of data acquisition in seconds
 DAQ_task_name = "forceTask"  # Name of the task used by the DAQ device to collect data
 DAQ_analog_channels = [0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13]  # List of used DAQ analog channels
-DAQ_terminal_config = 1  # Terminal configuration for ai ports of DAQ. See the class 'DAQTerminalConfig' below for a list of possible values
+DAQ_terminal_config = DAQTerminalConfig.DIFF  # Terminal configuration for ai ports of DAQ. See the class 'DAQTerminalConfig' above for a list of possible values
 
-ForceDataFileName = "epos_tst2.csv"
-
-
-# --------------------------------------------------------------------------------------------------------------------
-# Classes
-# --------------------------------------------------------------------------------------------------------------------
-class DAQTerminalConfig(Enum):
-    """This class enumerates the possible values for the DAQ TerminalConfiguration value as specified in the NiDAQmx API"""
-
-    DEFAULT = 0
-    DIFF = 1
-    NRSE = 2
-    PSEUDO_DIFF = 3
-    RSE = 4
-
+ForceDataFileName = "epos_tst2.csv"  # <- Change the name to whatever name you like
 
 # --------------------------------------------------------------------------------------------------------------------
 # Constants
@@ -109,7 +109,7 @@ def findDAQ_device(serial_number):
     return None
 
 
-def data_generator(task_name, channels, sample_rate, nSamples, terminal_configuration):
+def get_DAQ_Data(task_name, channels, sample_rate, nSamples, terminal_configuration):
     # Create a new array that uses the shared memory block. This array must match that of the original shared memory array
     data = np.ndarray((len(channels), nSamples), dtype=np.double)
 
@@ -146,27 +146,8 @@ def getForceSensorBias(channels, terminal_configuration):
     sample_rate = 1000
     nSamples = int(sample_rate * 2)  # Collect data for two seconds
 
-    # Create a new array to store the data
-    data = np.ndarray((len(channels), nSamples), dtype=np.double)
-
-    # Create a task for the DAQ device
-    with nidaqmx.Task(task_name) as task:
-        # Configure the task to use the specified channels. Use a differential terminal configuration as explained in the ATI/DAQ
-        # manual (DOC#: 9620-05-DAQ)
-        for channel in channels:
-            task.ai_channels.add_ai_voltage_chan(channel, terminal_config=terminal_configuration)
-
-        # Set timing configuration for the DAQ device
-        task.timing.cfg_samp_clk_timing(sample_rate, source="", active_edge=Edge.RISING, sample_mode=AcquisitionType.FINITE, samps_per_chan=nSamples)
-
-        # Create a reader for the task
-        reader = nidaqmx.stream_readers.AnalogMultiChannelReader(task.in_stream)
-
-        # Set the timeout to 5 seconds after the estimated data collection time
-        reader.read_many_sample(data, nSamples, timeout=(nSamples / sample_rate) + 5)
-
-        # Get the average data of each channel
-        return np.mean(data, axis=1, keepdims=True)
+    bias_data = get_DAQ_Data(task_name, channels, sample_rate, nSamples, terminal_configuration)
+    return bias_data
 
 
 def get_user_choice(prompt):
@@ -195,10 +176,10 @@ if __name__ == "__main__":
     DAQ_channels = [deviceName + "/ai" + str(ii) for ii in DAQ_analog_channels]
 
     # Configure DAQ terminals
-    if DAQTerminalConfig(DAQ_terminal_config) == DAQTerminalConfig.DEFAULT:
+    if DAQ_terminal_config == DAQTerminalConfig.DEFAULT:
         terminal_config = TerminalConfiguration.DEFAULT
 
-    elif DAQTerminalConfig(DAQ_terminal_config) == DAQTerminalConfig.DIFF:
+    elif DAQ_terminal_config == DAQTerminalConfig.DIFF:
         # Specify the DAQ channels that can be configured as a differential input
         diff_channels = ["ai" + str(ii) for ii in list(range(0, 8)) + list(range(16, 24))]
 
@@ -207,17 +188,17 @@ if __name__ == "__main__":
 
         terminal_config = TerminalConfiguration.DIFF
 
-    elif DAQTerminalConfig(DAQ_terminal_config) == DAQTerminalConfig.NRSE:
+    elif DAQ_terminal_config == DAQTerminalConfig.NRSE:
         terminal_config = TerminalConfiguration.NRSE
 
-    elif DAQTerminalConfig(DAQ_terminal_config) == DAQTerminalConfig.PSEUDO_DIFF:
+    elif DAQ_terminal_config == DAQTerminalConfig.PSEUDO_DIFF:
         terminal_config = TerminalConfiguration.PSEUDO_DIFF
 
-    elif DAQTerminalConfig(DAQ_terminal_config) == DAQTerminalConfig.RSE:
+    elif DAQ_terminal_config == DAQTerminalConfig.RSE:
         terminal_config = TerminalConfiguration.RSE
 
     else:
-        raise ValueError("Incorrect value for DAQ_terminal_config. Possible values are 0, 1, 2, 3, or 4")
+        raise ValueError("Incorrect value for DAQ_terminal_config")
 
     # ------------------------------------------------------------------------------------------------------------------
     choice = get_user_choice("Getting Force Sensor bias vector, please remove any weight attached to the sensor. Do you want to continue? [y/n]: ")
@@ -284,7 +265,7 @@ if __name__ == "__main__":
 
         # ------------------------------------------------------------------------------------------------------------------
         # Create a new numpy array that uses the shared memory
-        temp_forceData = data_generator(DAQ_task_name, DAQ_channels, DAQ_sample_rate, num_samples, terminal_config)
+        temp_forceData = get_DAQ_Data(DAQ_task_name, DAQ_channels, DAQ_sample_rate, num_samples, terminal_config)
 
         posDataAppend(motor1.GetPositionIs())
         forceData = np.hstack((forceData, temp_forceData)) if forceData.size else temp_forceData
@@ -328,7 +309,6 @@ if __name__ == "__main__":
     df_forceHeaders = pd.DataFrame(forceHeaders)
 
     # Transform force data into a dataframe
-    # df_forceBody = pd.DataFrame(transformedData.T, columns=["C", "D", "E", "F", "G", "H", "I"])
     df_forceBody = pd.DataFrame(transformedData.T, columns=["A", "B", "C", "D", "E", "F", "G", "H"])  # Columns names must match those of the headers dataframe
 
     df_forceData = pd.concat([df_forceHeaders, df_forceBody], ignore_index=True)
