@@ -247,28 +247,29 @@ if __name__ == "__main__":
     # Create an empty list to store the sensor and motor data
     posData = []
 
-    forceData = np.array([])
-
     # Improve list append times by avoiding dot chaining. We achieve this by assigning the append function to an object
     posDataAppend = posData.append
 
     # Calculate DAQ number of samples to read
     num_samples = int(DAQ_sample_rate * DAQ_acquisition_duration)
 
+    # Create a numpy array to store the force data. Preallocate memory based on the number of steps made
+    steps = range(initPos + motorSteps, targetPos + motorSteps, motorSteps)
+    forceData = np.zeros((6, len(steps)))
+
     print("Starting motion")
 
-    for step in range(initPos + motorSteps, targetPos + motorSteps, motorSteps):
-        print(step)
+    for step in steps:
         motor1.MoveToPositionSpeed(step, motorSpeed, 100000, 100000, True, False)
 
         motor1.WaitForTargetReached()
 
         # ------------------------------------------------------------------------------------------------------------------
-        # Create a new numpy array that uses the shared memory
+        # Create a temporal numpy array to store the force data
         temp_forceData = get_DAQ_Data(DAQ_task_name, DAQ_channels, DAQ_sample_rate, num_samples, terminal_config)
 
         posDataAppend(motor1.GetPositionIs())
-        forceData = np.hstack((forceData, temp_forceData)) if forceData.size else temp_forceData
+        forceData[:, step] = temp_forceData.flatten()
 
     posData[:] = [abs((int(x) * SCREW_LEAD) / (QC * GEAR_HEAD)) for x in posData]
     posData = np.array(posData)[None, :]
