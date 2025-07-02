@@ -5,6 +5,7 @@ This repo provides a simple example to interact with the ATI Gamma force sensor.
 
 ## Requirements
 - Some of tha main files may interact with an EPOS motor driver. Please download the drivers from https://www.maxongroup.com/maxon/view/product/control/Positionierung/390438. The driver is located under Downloads -> Software/Firmware -> EPOS USB Driver Installation
+- To interact with a National Instruments DAQ, you will need the NI-DAQmx drivers. Please download from https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#565026 
 
 ## Main files description
 
@@ -13,17 +14,20 @@ This repo provides a simple example to interact with the ATI Gamma force sensor.
 ## Installation
 
 ```shell
-# Clone the repository
+# Clone the repository in a directory of your choice
 git clone https://github.com/jcollial/ATI-Gamma-Force-Sensor.git
 
-# Navigate into the directory
+# Navigate into the directory that contains the repository files
 cd ATI-Gamma-Force-Sensor
 
 # Create a python virtual environment within the project directory (change my-venv for the name of your virtual environment)
-python -m venv my-venv
+python -m venv venv
 
 # Activate the virtual environment
-my-venv\Scripts\activate
+# If using Windows cmd
+venv\Scripts\activate
+# If using PowerShell
+.\venv\Scripts\Activate.ps1
 
 # Install dependencies
 python -m pip install -r requirements.txt
