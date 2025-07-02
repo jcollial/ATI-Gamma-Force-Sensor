@@ -35,9 +35,9 @@ class DAQTerminalConfig(Enum):
 ###########################
 # CHANGE TARGETPOS FOR EACH SENSOR!
 ###########################
-targetPos = 20  # Desired target position in mm --> This value can be changed for different testing cases == the amplitude of the cycle = maximum distance the sensor will stretch over
+targetPos = 55  # Desired target position in mm --> This value can be changed for different testing cases == the amplitude of the cycle = maximum distance the sensor will stretch over
 
-motorSteps = 5  # in mm -> increments in displacement until we reach the desired target position
+motorSteps = 2  # in mm -> increments in displacement until we reach the desired target position
 
 # these values can be changed, but should stay consistent for multiple rounds of testing
 initPos = 0  # Desired initial position in mm
@@ -55,7 +55,7 @@ DAQ_task_name = "forceTask"  # Name of the task used by the DAQ device to collec
 DAQ_analog_channels = [0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13]  # List of used DAQ analog channels
 DAQ_terminal_config = DAQTerminalConfig.DIFF  # Terminal configuration for ai ports of DAQ. See the class 'DAQTerminalConfig' above for a list of possible values
 
-ForceDataFileName = "epos_tst2.csv"  # <- Change the name to whatever name you like
+ForceDataFileName = "Test4SP.csv"  # <- Change the name to whatever name you like
 
 # --------------------------------------------------------------------------------------------------------------------
 # Constants
@@ -256,10 +256,23 @@ if __name__ == "__main__":
     # Create a numpy array to store the force data. Preallocate memory based on the number of steps made
     steps = range(initPos + motorSteps, targetPos + motorSteps, motorSteps)
     forceData = np.zeros((6, len(steps)))
+    # ------------------------------------------------------------------------------------------------------------------
+    choice = get_user_choice("Ready to start? Do you want to continue? [y/n]: ")
+
+    if choice == "y":
+        print("Getting bias vector, please do not touch the force sensor.")
+        biasVector = getForceSensorBias(DAQ_channels, terminal_config)
+    else:
+        print("You chose to not continue.")
+        sys.exit(1)
+
+    print("Sensor bias complete")
+
+    # ------------------------------------------------------------------------------------------------------------------
 
     print("Starting motion")
 
-    for step in steps:
+    for index,step in enumerate(steps):
         motor1.MoveToPositionSpeed(step, motorSpeed, 100000, 100000, True, False)
 
         motor1.WaitForTargetReached()
@@ -269,7 +282,7 @@ if __name__ == "__main__":
         temp_forceData = get_DAQ_Data(DAQ_task_name, DAQ_channels, DAQ_sample_rate, num_samples, terminal_config)
 
         posDataAppend(motor1.GetPositionIs())
-        forceData[:, step] = temp_forceData.flatten()
+        forceData[:, index] = temp_forceData.flatten()
 
     posData[:] = [abs((int(x) * SCREW_LEAD) / (QC * GEAR_HEAD)) for x in posData]
     posData = np.array(posData)[None, :]
