@@ -1,4 +1,3 @@
-# FOR EACH SENSOR CHANGE: STRETCH AMOUNT, FILE NAME, RESISTANCE SUBTRACTION
 # D1 supply must always be at 20V. D2 can change but D1 can’t go past 20V
 
 import pathlib
