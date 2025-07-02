@@ -128,7 +128,6 @@ def get_DAQ_Data(task_name, channels, sample_rate, nSamples, terminal_configurat
 
         # print("DAQ Process: Done waiting for serial")
         reader.read_many_sample(data, nSamples, timeout=(nSamples / sample_rate) + 10)
-        print("DAQ Process: Done collecting data from DAQ")
 
         # Get the average data of each channel
         return np.mean(data, axis=1, keepdims=True)
@@ -201,18 +200,6 @@ if __name__ == "__main__":
         raise ValueError("Incorrect value for DAQ_terminal_config")
 
     # ------------------------------------------------------------------------------------------------------------------
-    choice = get_user_choice("Getting Force Sensor bias vector, please remove any weight attached to the sensor. Do you want to continue? [y/n]: ")
-
-    if choice == "y":
-        print("Getting bias vector, please do not touch the force sensor.")
-        biasVector = getForceSensorBias(DAQ_channels, terminal_config)
-    else:
-        print("You chose to not continue.")
-        sys.exit(1)
-
-    print("Sensor bias complete")
-
-    # ------------------------------------------------------------------------------------------------------------------
     # Calculate motor displacement:
     # Our setup uses a single lead leadscrew, with a 2 mm lead (SCREW_LEAD); lead = linear travel per 1 screw rev
     # The motor gearhead has a reduction of 29:1 (GEAR_HEAD)
@@ -250,13 +237,26 @@ if __name__ == "__main__":
     # Improve list append times by avoiding dot chaining. We achieve this by assigning the append function to an object
     posDataAppend = posData.append
 
+    # ------------------------------------------------------------------------------------------------------------------
+    choice = get_user_choice("Getting Force Sensor bias vector, please remove any weight attached to the sensor. Do you want to continue? [y/n]: ")
+
+    if choice == "y":
+        print("Getting bias vector, please do not touch the force sensor.")
+        biasVector = getForceSensorBias(DAQ_channels, terminal_config)
+    else:
+        print("You chose to not continue.")
+        sys.exit(1)
+
+    print("Sensor bias complete")
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Calculate DAQ number of samples to read
     num_samples = int(DAQ_sample_rate * DAQ_acquisition_duration)
 
     # Create a numpy array to store the force data. Preallocate memory based on the number of steps made
     steps = range(initPos + motorSteps, targetPos + motorSteps, motorSteps)
     forceData = np.zeros((6, len(steps)))
-    # ------------------------------------------------------------------------------------------------------------------
+
     choice = get_user_choice("Ready to start? Do you want to continue? [y/n]: ")
 
     if choice == "y":
@@ -271,8 +271,10 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------------------------------------------------------
 
     print("Starting motion")
-
-    for index,step in enumerate(steps):
+    sleep(1)
+    print(f"Motor will move {len(steps)}")
+    for index, step in enumerate(steps):
+        print(f"Step: {index+1}")
         motor1.MoveToPositionSpeed(step, motorSpeed, 100000, 100000, True, False)
 
         motor1.WaitForTargetReached()
@@ -301,6 +303,9 @@ if __name__ == "__main__":
 
     motor1.DisableDevice()
     motor1.CloseDevice()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    print(f"\nSaving data, please wait...")
 
     # Check if Force Data folder exists. If it does not, then create the folder to store data
     dataFolderNamePath = pathlib.Path(__file__).parent.joinpath("Force Data")
@@ -336,4 +341,4 @@ if __name__ == "__main__":
         header=False,
     )
 
-    print("done")
+    print(f"\nDone saving data")
