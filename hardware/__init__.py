@@ -1,1 +1,1 @@
-from .EPOS.EposCls import EPOS
+from .epos.EposCls import EPOS
