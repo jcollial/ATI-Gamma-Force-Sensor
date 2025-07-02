@@ -9,8 +9,8 @@ This repo provides a simple example to interact with the ATI Gamma force sensor.
 
 ## Main files description
 
-- EPOS_Force_Datalogger: Program used to control an EPOS motor driver and collect data from the ATI force sensor
-- single_motor_control_example: Example code to control the motion of the Maxon motor. ATI force sensor data will not be collected in this example
+- `EPOS_Force_Datalogger`: Program used to control an EPOS motor driver and collect data from the ATI force sensor
+- `single_motor_control_example`: Example code to control the motion of the Maxon motor. ATI force sensor data will not be collected in this example
 
 ## Installation
 
