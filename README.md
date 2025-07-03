@@ -1,12 +1,11 @@
 
 # ATI Gamma Force Sensor
 
-This repo provides a simple example to interact with the ATI Gamma force sensor.
+This repo provides a simple example to controll an EPOS motor driver and collect data from an ATI Gamma force sensor using a NI DAQ device.
 
 ## Requirements
-- Some of tha main files may interact with an EPOS motor driver. Please download the drivers from https://www.maxongroup.com/maxon/view/product/control/Positionierung/390438. The driver is located under Downloads -> Software/Firmware -> EPOS USB Driver Installation
-- To interact with a National Instruments DAQ using the nidaqmx library, you will need the NI-DAQmx drivers. Please download from https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#565026.
-  None of the recommended Additional items are required for nidaqmx to function, and they can be removed to minimize installation size. It is recommended you continue to install the NI Certificates package to allow your Operating System to trust NI built binaries, improving your software and hardware installation experience. 
+- Some of tha main files may interact with an EPOS motor driver using an USB connection. Please download the EPOS USB Driver from https://www.maxongroup.com/maxon/view/product/control/Positionierung/390438. The driver is located under Downloads -> Software/Firmware -> EPOS USB Driver Installation
+- The nidaqmx python library is used to interact with a National Instruments DAQ device. Running nidaqmx requires NI-DAQmx to be installed. Please download from https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#565026 or from https://www.ni.com/en/support/downloads.html. None of the recommended Additional items are required for nidaqmx to function, and they can be removed to minimize installation size. It is recommended you continue to install the NI Certificates package to allow your Operating System to trust NI built binaries, improving your software and hardware installation experience. More information about the nidaqmx requirements as well as other installation options can be found in https://nidaqmx-python.readthedocs.io/en/latest/index.html
 
 ## Main files description
 
