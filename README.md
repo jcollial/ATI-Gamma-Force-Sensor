@@ -21,7 +21,7 @@ git clone https://github.com/jcollial/ATI-Gamma-Force-Sensor.git
 # Navigate into the directory that contains the repository files
 cd ATI-Gamma-Force-Sensor
 
-# Create a python virtual environment within the project directory (change my-venv for the name of your virtual environment)
+# Create a python virtual environment within the project directory
 python -m venv venv
 
 ```
