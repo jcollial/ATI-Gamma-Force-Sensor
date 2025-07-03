@@ -50,3 +50,7 @@ python -m pip install -r requirements.txt
 deactivate
 
 ```
+## Additional information
+Each ATI Force Sensor comes with a calibration matrix unique to each sensor. The calibration matrix is the transducer calibration matrix provided on the software zip folder from ATI. The ATI supplied six-by-six calibration matrix matches the sensor’s FTxxxxx serial number in either the ATI software or the customer software. This standard matrix when multiplied by the biased strain gage data being generated from the transducer provides the force and torque data that can be used for the application.
+
+The `EPOS_Force_Datalogger.py` file included in this repository loads the calibration matrix from `ATI-Gamma-Force-Sensor/Calibration Files/FT21484_cal_mat.txt`. If you have other calibration matrix files, please include them in this directory and update the `EPOS_Force_Datalogger.py` file. 
