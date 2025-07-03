@@ -25,14 +25,29 @@ cd ATI-Gamma-Force-Sensor
 # Create a python virtual environment within the project directory (change my-venv for the name of your virtual environment)
 python -m venv venv
 
-# Activate the virtual environment
-# If using Windows cmd
+```
+
+### Activate the virtual environment
+Use the appropriate command based on your terminal or operation system:
+- Windows Command Prompt
+```shell
 venv\Scripts\activate
-# If using PowerShell
+
+```
+- Windows PowerShell
+```shell
 .\venv\Scripts\Activate.ps1
 
-# Install dependencies
+```
+
+### Install dependencies
+```shell
 python -m pip install -r requirements.txt
 
-# To deactivate the virtual environment, type the following in the terminal window
+```
+
+### To deactivate the virtual environment, type the following in the terminal window
+```shell
 deactivate
+
+```
