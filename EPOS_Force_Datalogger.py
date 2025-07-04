@@ -261,17 +261,12 @@ if __name__ == "__main__":
     choice = get_user_choice("Ready to start? Do you want to continue? [y/n]: ")
 
     if choice == "y":
-        print("Getting bias vector, please do not touch the force sensor.")
-        biasVector = getForceSensorBias(DAQ_channels, terminal_config)
+        print("Starting motion...")
     else:
         print("You chose to not continue.")
         sys.exit(1)
 
-    print("Sensor bias complete")
-
     # ------------------------------------------------------------------------------------------------------------------
-
-    print("Starting motion")
     sleep(1)
     print(f"Motor will move {len(steps)}")
     for index, step in enumerate(steps):
