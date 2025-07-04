@@ -83,6 +83,8 @@ COUNTS_PER_TURN = 256  # encoder counts per turn
 # From 'Section 3.3: System Units' on EPOS2 Firmware Specification guide (Edition 2017)
 QC = 4 * COUNTS_PER_TURN  # motor specific variable
 
+MOTOR_MAX_SPEED = 8000  # Speed limit in rpm for the motor. Check motor specifications to find this value. WARNING: moving the motor at max speed can cause damage to the motor
+
 
 # --------------------------------------------------------------------------------------------------------------------
 # Functions
@@ -224,7 +226,7 @@ if __name__ == "__main__":
     currentPos = motor1.GetPositionIs()
     if currentPos != initPos:
         print("Moving motor to desired initial position, please wait until motor stops moving")
-        motor1.MoveToPositionSpeed(initPos, motorSpeed, 100000, 100000, True, True)
+        motor1.MoveToPositionSpeed(initPos, min(motorSpeed, MOTOR_MAX_SPEED), 100000, 100000, True, True)
         motor1.WaitForTargetReached()
         sleep(1)
 

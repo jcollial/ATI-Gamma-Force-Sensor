@@ -5,7 +5,8 @@ from hardware import EPOS  # Required for EPOS sensor
 # --------------------------------------------------------------------------------------------------------------------
 # Motion related variables:
 targetPos = 40  # Desired target position in mm
-absoluteMotion = False # True/False. Set to False if you want to move relative to the current position 
+absoluteMotion = False  # True/False. Set to False if you want to move relative to the current position
+motorSpeed = 2000  # Motor moving speed
 
 # EPOS variables:
 baudRate_epos = 115200  # 1000000  # EPOS baud rate (unit of signaling speed)
@@ -25,6 +26,8 @@ COUNTS_PER_TURN = 256  # encoder counts per turn
 # EPOS quadcounts (QCs):
 # From 'Section 3.3: System Units' on EPOS2 Firmware Specification guide (Edition 2017)
 QC = 4 * COUNTS_PER_TURN
+
+MOTOR_MAX_SPEED = 8000  # Speed limit in rpm for the motor. Check motor specifications to find this value. WARNING: moving the motor at max speed can cause damage to the motor
 
 # --------------------------------------------------------------------------------------------------------------------
 # Main function
@@ -49,7 +52,7 @@ if __name__ == "__main__":
     motor1.ActivatePPM()
 
     # If the ESP32 is ready start motion
-    motor1.MoveToPositionSpeed(targetPos, 2000, 100000, 100000, absoluteMotion, False)
+    motor1.MoveToPositionSpeed(targetPos, min(motorSpeed, MOTOR_MAX_SPEED), 100000, 100000, absoluteMotion, False)
 
     motor1.WaitForTargetReached()
 
