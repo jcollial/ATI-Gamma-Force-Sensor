@@ -271,7 +271,7 @@ if __name__ == "__main__":
     print(f"Motor will move {len(steps)}")
     for index, step in enumerate(steps):
         print(f"Step: {index+1}")
-        motor1.MoveToPositionSpeed(step, motorSpeed, 100000, 100000, True, False)
+        motor1.MoveToPositionSpeed(step, min(motorSpeed, MOTOR_MAX_SPEED), 100000, 100000, True, False)
 
         motor1.WaitForTargetReached()
 
@@ -294,7 +294,7 @@ if __name__ == "__main__":
     if currentPos != 0:
         print("Homing motor, please wait until motor stops moving")
         sleep(1)
-        motor1.MoveToPositionSpeed(0, motorSpeed, 100000, 100000, True, True)
+        motor1.MoveToPositionSpeed(0, min(motorSpeed, MOTOR_MAX_SPEED), 100000, 100000, True, True)
         motor1.WaitForTargetReached()
 
     motor1.DisableDevice()
